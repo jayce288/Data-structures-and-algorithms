@@ -1,0 +1,129 @@
+#define _CRT_SECURE_NO_WARNINGS  //scanf 반환값 무시
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct _queue {
+    int front;
+    int rear;
+    int capacity;
+    int* array;
+    int* array_1;        
+} queue;
+
+queue* CreateCQueue() {                 //큐 생성
+    queue* q = malloc(sizeof(queue));
+    if (!q)
+        return NULL;
+    q->capacity = 500000;
+    q->front = q->rear = -1;
+    q->array = malloc(q->capacity * sizeof(int));
+    if (!q->array)
+        return NULL;
+    return q;
+}
+
+int IsEmptyCQ(queue* q)                 //큐 공백상태
+{
+    return (q->front == -1);
+}
+
+int IsFullCQ(queue* q)                  //큐 포화상태
+{
+    return ((q->rear + 1) % q->capacity == q->front);
+}
+
+int CQsize(queue* q)
+{
+    return (q->capacity - q->front + q->rear + 1) % q->capacity;
+}
+
+void ResizeCQ(queue* q)                 //큐 크기 조정
+{
+    int size = q->capacity;
+    q->capacity = q->capacity * 2;
+    q->array_1 = realloc(q->array, q->capacity);
+    if (q->array_1 != NULL) {
+        q->array = q->array_1;
+    }
+    if (!q->array)
+    {
+        printf("failed to resize\n");
+        return;
+    }
+    if (q->front > q->rear)
+    {
+        for (int i = 0; i < q->front; i++)
+        {
+            q->array[i + size] = q->array[i];
+        }
+        q->rear = q->rear + size;
+    }
+    printf("Size of Q doubled\n");
+}
+
+void EnCQ(queue* q, int data)       //큐에 데이터 삽입
+{
+    if (IsFullCQ(q))
+        ResizeCQ(q);
+    q->rear = (q->rear + 1) % q->capacity;
+    q->array[q->rear] = data;
+    if (q->front == -1)
+        q->front = q->rear;
+
+}
+
+int DeCQ(queue* q)                 //큐 데이터 삭제
+{
+    int data = 0;
+    if (IsEmptyCQ(q))
+    {
+        printf("CQueue is Empty\n");
+        return 0;
+    }
+    else
+    {
+        data = q->array[q->front];
+        if (q->front == q->rear)
+            q->front = q->rear = -1;
+        else
+            q->front = (q->front + 1) % q->capacity;
+    }
+    return data;
+}
+
+void DelCQ(queue* q)             //큐 메모리 반환
+{
+    if (q)
+    {
+        if (q->array)
+            free(q->array);
+        free(q);
+    }
+    printf("Queue Deleted\n");
+}
+
+void printQueue(queue* q) {     //큐 데이터 출력
+    for (int i = q->front; i < q->rear + 1; i++) {
+        printf("%d\n",q->array[i]);
+    }
+}
+
+int main(void)
+{
+    int N, temp;
+    scanf("%d", &N);         //정수 N 입력 
+    queue* Q = CreateCQueue();
+    for (int i = 0; i < N; i++) {   //큐에 1부터 N까지 삽입
+        EnCQ(Q, i + 1);
+    }
+
+    while (Q->front != Q->rear) {   //큐에 하나가 남았다는 말은 front랑 rear값이 같다는 의미이므로 둘의 값이 같아질 때까지 반복해준다.
+        DeCQ(Q);                    //위에있는 카드 버리고
+        temp = DeCQ(Q);             //그다음 카드는 위에서 맨뒤로 옮기는 과정
+        EnCQ(Q, temp);
+    }
+
+    printQueue(Q);                  //남은 카드 출력
+    DelCQ(Q);
+    return 0;
+}
