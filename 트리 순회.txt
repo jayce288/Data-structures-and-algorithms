@@ -1,0 +1,90 @@
+#define _CRT_SECURE_NO_WARNINGS   //scanf 반환값 무시
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {   //문자 값 data와 2개의 링크를 가지고 있는 구조체
+    char data;
+    struct Node* left, * right;
+}TreeNode;
+
+TreeNode* NewNode(char data) {   //data를 값으로 가지는 node 생성
+    TreeNode* New;
+    New = (TreeNode*)malloc(sizeof(TreeNode));
+    New->data = data;   
+    New->left = New->right = NULL;
+    return New;
+}
+TreeNode* search_Node(TreeNode* H, char data) {   //탐색 함수
+    if (H != NULL) {
+        if (H->data == data) {
+            return H;   //탐색에 성공
+        }
+        else {
+            TreeNode* tmp = search_Node(H->left, data);   //왼쪽 자식 탐색
+            if (tmp != NULL) {
+                return tmp;
+            }
+
+            return search_Node(H->right, data);   //오른쪽 자식 탐색
+        }
+    }
+    return NULL;   //탐색에 실패하면 NULL 반환
+}
+void insert_Node(TreeNode* H, char A, char B, char C) {
+    H->data = A;   //노드에 A삽입
+    if (B != '.') {
+        H->left = NewNode(B);   //왼쪽 자식에 node B생성
+    }
+    if (C != '.') {
+        H->right = NewNode(C);   //오른쪽 자식에 node C생성 
+    }
+}
+
+preorder(TreeNode* root) {   //전위 순회
+    if (root) {
+        printf("%c", root->data); // 노드 방문
+        preorder(root->left); // 왼쪽서브트리 순회
+        preorder(root->right); // 오른쪽서브트리 순회
+    }
+}
+
+inorder(TreeNode* root) {   //중위 순회
+    if (root) {
+        inorder(root->left); // 왼쪽서브트리 순회
+        printf("%c", root->data); // 노드 방문
+        inorder(root->right); // 오른쪽서브트리 순회
+    }
+}
+
+postorder(TreeNode* root) {   //후위 순회
+    if (root) {
+        postorder(root->left); // 왼쪽 서브 트리 순회
+        postorder(root->right); // 오른쪽 서브 트리 순회
+        printf("%c", root->data); // 노드 방문
+    }
+}
+
+
+int main() {
+    TreeNode* H = NewNode(NULL);
+    TreeNode* tmp;
+    int N;
+    int i;
+    scanf("%d", &N);   //노드의 개수 입력
+    getchar();   //버퍼에 남아있는 \n 제거
+    for (i = 0; i < N; i++) {
+        char A, B, C;
+        scanf("%c %c %c", &A, &B, &C);
+        getchar();   //버퍼에 남아있는 \n 제거
+        tmp = search_Node(H, A);   //A 탐색
+        if (tmp != NULL)   //A가 있으면 tmp에 노드 삽입
+            insert_Node(tmp, A, B, C);
+        else   //A가 없으면 h에 노드 삽입
+            insert_Node(H, A, B, C);
+    }
+    preorder(H);    //전위 순회
+    printf("\n");
+    inorder(H);     //중위 순회
+    printf("\n");
+    postorder(H);   //후위 순회
+}
