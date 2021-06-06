@@ -1,0 +1,112 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX_SIZE 100000   //큐의 용량
+
+typedef struct _queue {   //큐 구조체 정의
+    int front;
+    int rear;
+    int* array;
+} queue;
+
+queue* CreateCQueue() {   //큐 생성
+    queue* q = malloc(sizeof(queue));
+    if (!q)
+        return NULL;
+    q->front = q->rear = -1;
+    q->array = malloc(MAX_SIZE * sizeof(int));
+    if (!q->array)
+        return NULL;
+    return q;
+}
+
+int IsEmptyCQ(queue* q) {   //큐가 비어있을 때
+    return (q->front == -1);
+}
+
+int IsFullCQ(queue* q) {   //큐가 가득찼을 떄
+    return ((q->rear + 1) == q->front);
+}
+
+void EnCQ(queue* q, int data) {   //큐에 데이터 삽입
+    if (IsFullCQ(q))
+        printf("error");
+    q->rear = q->rear + 1;
+    q->array[q->rear] = data;
+    if (q->front == -1)
+        q->front = q->rear;
+}
+
+int DeCQ(queue* q) {   //큐에 데이터 삭제
+    int data = 0;
+    if (IsEmptyCQ(q)) {
+        printf("error");
+    }
+    else {
+        data = q->array[q->front];
+        if (q->front == q->rear)
+            q->front = q->rear = -1;
+        else
+            q->front = q->front + 1;
+    }
+    return data;
+}
+
+void DelCQ(queue* q) {   //큐 메모리 반환
+    if (q)
+    {
+        if (q->array)
+            free(q->array);
+        free(q);
+    }
+}
+
+void ReverseQueue(queue* q) {   //큐 뒤집기
+    int l = q->rear+1;
+    int top = -1;
+    int* array_2 = (int*)malloc(MAX_SIZE * sizeof(int));   
+
+    if (array_2 != NULL) {
+        for (int i = 0; i < l; i++) {   
+            array_2[++top] = q->array[i];   //큐에 있던 값을 array_2로 이동
+        }
+
+        for (int i = 0; i < l; i++) {       //array_2에 있던 값을 다시 q로 이동 이때 array_2는 스택이라 큐에 있던 값의 맨 마지막 값부터 큐에 저장된다.
+            q->array[i] = array_2[top--];
+        }
+        free(array_2);  
+    }
+}
+
+int main(void) {
+    int T;
+    scanf("%d", &T);
+    for (int i = 0; i < T; i++) {
+        queue* Q = CreateCQueue();
+        int n, N;
+        char* p = (char*)malloc(100000*sizeof(char));   //함수를 입력받을 p생성
+        scanf("%s", p);  //함수 입력
+        scanf("%d", &n);   //수의 개수 입력
+
+        for (int j = 0; j < n; j++) {   
+            scanf("%d", &N);   //배열에 들어갈 수 입력
+            EnCQ(Q, N);        //큐에 삽입
+        }
+
+        for (int k = 0; k < strlen(p); k++) {   
+            if (p[k] == 'R') {   //입력받은 함수가 R이면 뒤집기
+                ReverseQueue(Q);
+            }
+            else if (p[k] == 'D') {   //D면 하나 삭제
+                DeCQ(Q);
+            }
+            else break;
+        }
+        for (int l = Q->front; l < Q->rear+1; l++) {   //큐에 남아있는 수 출력
+            printf("%d ", Q->array[l]);
+        }
+        DelCQ(Q);
+    }
+    return 0;
+}
